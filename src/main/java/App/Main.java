@@ -4,14 +4,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
 
 
 public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		try {
-			AnchorPane root = FXMLLoader.load(getClass().getResource("View/View.fxml"));
+			AnchorPane root = FXMLLoader.load(getClass().getClassLoader().getResource("View.fxml"));
 			primaryStage.setTitle("RaPizz");
 			Scene scene = new Scene(root,1280,720);
 			primaryStage.setScene(scene);
