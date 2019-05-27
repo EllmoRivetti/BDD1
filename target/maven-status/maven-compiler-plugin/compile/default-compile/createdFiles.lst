@@ -1,0 +1,3 @@
+App\Main.class
+App\View\MainController.class
+App\View\payWindowController.class
