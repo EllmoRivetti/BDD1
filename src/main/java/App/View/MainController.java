@@ -7,6 +7,8 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXListView;
 import com.jfoenix.controls.JFXMasonryPane;
 
+import App.Model.DatabaseConnection;
+import App.Model.Utilisateur;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,6 +18,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -25,6 +28,9 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class MainController {
+	
+	/**FXML Object **/
+	
 	@FXML
 	private JFXListView<Label> panierList;
 
@@ -33,6 +39,28 @@ public class MainController {
 	
 	@FXML
 	private Label totalPanier;
+	
+	@FXML
+	private BorderPane panePizzaDisplay;
+	
+	@FXML
+    private TabPane tabPaneCompte;
+
+    @FXML
+    private JFXButton btnCompteConnexion;
+
+    @FXML
+    private JFXButton btnCompteInscription;
+
+    @FXML
+    private Label lblCompteNom;
+
+    @FXML
+    private Label lblCompteSolde;
+    
+    
+    
+    /**Class Object **/
 
 	private JFXMasonryPane pizzaDisplay;
 
@@ -40,11 +68,18 @@ public class MainController {
 
 	private Label defaultPanierLabel;
 	
+	private Utilisateur currentUser;
+	
+	private boolean isUserLoggedIn;
+	
 
 	@FXML
 	public void initialize() {
-		System.out.println("Slt");
-
+		System.out.println("DB Connexion");
+		DatabaseConnection bdConnection = new DatabaseConnection();
+		bdConnection.openConnection();
+		
+		
 		defaultPanierLabel = new Label("Votre panier est vide.");
 		defaultPanierLabel.setStyle("-fx-font-size: 15px;");
 
@@ -55,7 +90,7 @@ public class MainController {
 			mainScrollPane.setStyle("-fx-background-color:#e0e0e0;");
 			mainScrollPane.setContent(pizzaDisplay);
 			mainScrollPane.setFitToWidth(true);
-			mainPane.setCenter(mainScrollPane);
+			panePizzaDisplay.setCenter(mainScrollPane);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 	
