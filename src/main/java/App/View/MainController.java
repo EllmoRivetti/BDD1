@@ -14,6 +14,7 @@ import com.jfoenix.controls.JFXDialogLayout;
 import com.jfoenix.controls.JFXListView;
 import com.jfoenix.controls.JFXMasonryPane;
 import com.jfoenix.controls.JFXPasswordField;
+import com.jfoenix.controls.JFXTabPane;
 import com.jfoenix.controls.JFXTextField;
 import com.sun.security.auth.UserPrincipal;
 
@@ -30,6 +31,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -44,13 +46,13 @@ import javafx.stage.Stage;
 
 public class MainController {
 
-	
+
 	/**Singleton**/
 	public static MainController instance;
 
-	
+
 	/**FXML Object **/
-	
+
 	@FXML
 	private JFXListView<Label> panierList;
 
@@ -65,6 +67,9 @@ public class MainController {
 
 	@FXML
 	private TabPane tabPaneCompte;
+	
+	@FXML
+	private JFXTabPane mainTabPane;
 
 	@FXML
 	private JFXButton btnCompteConnexion;
@@ -84,7 +89,7 @@ public class MainController {
 
 	@FXML
 	private StackPane stackPaneCompte;
-	
+
 	@FXML
 	private StackPane stackPanePizzaDisplay;
 
@@ -99,25 +104,28 @@ public class MainController {
 	private Label defaultPanierLabel;
 
 	public static Utilisateur currentUser = null;
-	
+
 	public static double amountbasket = 0;
-	
+
 	public static ArrayList<String> basketContent = new ArrayList<String>();
-	
+
 	public static Stage payStage;
-	
+
 	public static Stage registerStage;
 
 	private boolean isUserLoggedIn;
 
 	private ArrayList<Pizza> pizzaList;
 
+	private Tab tabBackEnd;
+
 
 	@FXML
 	public void initialize() {
-		instance = this;
-		setEvents();
-
+		instance = this;//Instantiate singleton
+		
+		setEvents();//instantiate events
+		initTabBackEnd();
 		pizzaList = new ArrayList<Pizza>();
 		fillPizzaList();
 
@@ -137,42 +145,59 @@ public class MainController {
 		}
 	}
 
+	private void initTabBackEnd() {
+		tabBackEnd = new Tab();
+		tabBackEnd.setText("Administration");
+		BorderPane root;
+
+		FXMLLoader fxmlLoader = new FXMLLoader();
+		try {
+			root = fxmlLoader.load(getClass().getClassLoader().getResource("FXML/backEndView.fxml"));
+			tabBackEnd.setContent(root);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	private void setEvents() {
 		btnCompteConnexion.setOnAction(e->{
 			connection(true);
 		});
-		
+
 		btnCompteDeco.setOnAction(e->{
+			mainTabPane.getSelectionModel().select(1);
+			mainTabPane.getTabs().remove(2);
 			tabPaneCompte.getSelectionModel().select(0);
 			JFXDialogLayout layout = new JFXDialogLayout();
-	    	layout.setHeading(new Text("Information"));
-	    	layout.setBody(new Text("Vous avez été déconnecté"));
-	    	JFXDialog dialog = new JFXDialog(stackPaneCompte,layout,JFXDialog.DialogTransition.CENTER);
-	    	
-	    	JFXButton btnOk= new JFXButton("Ok");
-	    	btnOk.setRipplerFill(Paint.valueOf("#80e27e"));
-	    	btnOk.setStyle("-fx-background-color:#4caf50;");
-	    	btnOk.setOnMouseEntered(i->{
-	    		btnOk.setStyle("-fx-background-color:#087f23;"
+			layout.setHeading(new Text("Information"));
+			layout.setBody(new Text("Vous avez été déconnecté"));
+			JFXDialog dialog = new JFXDialog(stackPaneCompte,layout,JFXDialog.DialogTransition.CENTER);
+
+			JFXButton btnOk= new JFXButton("Ok");
+			btnOk.setRipplerFill(Paint.valueOf("#80e27e"));
+			btnOk.setStyle("-fx-background-color:#4caf50;");
+			btnOk.setOnMouseEntered(i->{
+				btnOk.setStyle("-fx-background-color:#087f23;"
 						+ "-fx-text-fill:white;");
 			});
 
-	    	btnOk.setOnMouseExited(i->{
-	    		btnOk.setStyle("-fx-background-color:#4caf50;"
+			btnOk.setOnMouseExited(i->{
+				btnOk.setStyle("-fx-background-color:#4caf50;"
 						+ "-fx-text-fill:black;");
 			});
-	    	
-	    	btnOk.setOnAction(i->{
-	    		dialog.close();
-	    	});
-	    	
-	    	layout.setActions(btnOk);
-	    	
-	    	dialog.show();
-	    	currentUser = null;
-	    	isUserLoggedIn = false;
+
+			btnOk.setOnAction(i->{
+				dialog.close();
+			});
+
+			layout.setActions(btnOk);
+
+			dialog.show();
+			currentUser = null;
+			isUserLoggedIn = false;
 		});
-		
+
 		btnCompteInscription.setOnAction(e->{
 			register();
 		});
@@ -313,40 +338,40 @@ public class MainController {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@FXML
 	void commander(ActionEvent event) {
-		
+
 		if(!isUserLoggedIn) {
 			JFXDialogLayout layout = new JFXDialogLayout();
-	    	layout.setHeading(new Text("Information"));
-	    	layout.setBody(new Text("Veuillez vous connecter avant de commander"));
-	    	JFXDialog dialog = new JFXDialog(stackPanePizzaDisplay,layout,JFXDialog.DialogTransition.CENTER);
-	    	dialog.setOnDialogClosed(e->{
-	    		connection(false);
-	    	});
-	    	
-	    	JFXButton btnOk= new JFXButton("Ok");
-	    	btnOk.setRipplerFill(Paint.valueOf("#80e27e"));
-	    	btnOk.setStyle("-fx-background-color:#4caf50;");
-	    	
-	    	btnOk.setOnMouseEntered(i->{
-	    		btnOk.setStyle("-fx-background-color:#087f23;"
+			layout.setHeading(new Text("Information"));
+			layout.setBody(new Text("Veuillez vous connecter avant de commander"));
+			JFXDialog dialog = new JFXDialog(stackPanePizzaDisplay,layout,JFXDialog.DialogTransition.CENTER);
+			dialog.setOnDialogClosed(e->{
+				connection(false);
+			});
+
+			JFXButton btnOk= new JFXButton("Ok");
+			btnOk.setRipplerFill(Paint.valueOf("#80e27e"));
+			btnOk.setStyle("-fx-background-color:#4caf50;");
+
+			btnOk.setOnMouseEntered(i->{
+				btnOk.setStyle("-fx-background-color:#087f23;"
 						+ "-fx-text-fill:white;");
 			});
 
-	    	btnOk.setOnMouseExited(i->{
-	    		btnOk.setStyle("-fx-background-color:#4caf50;"
+			btnOk.setOnMouseExited(i->{
+				btnOk.setStyle("-fx-background-color:#4caf50;"
 						+ "-fx-text-fill:black;");
 			});
-	    	
-	    	btnOk.setOnAction(i->{
-	    		dialog.close();
-	    	});
-	    	
-	    	layout.setActions(btnOk);
-	    	
-	    	dialog.show();
+
+			btnOk.setOnAction(i->{
+				dialog.close();
+			});
+
+			layout.setActions(btnOk);
+
+			dialog.show();
 		}
 		else {
 			payStage = new Stage();
@@ -399,7 +424,7 @@ public class MainController {
 		}	
 	}
 
-	
+
 	private void connection(boolean accountView) {
 		JFXDialog dialogConnection;
 		JFXDialogLayout layout = new JFXDialogLayout();
@@ -441,7 +466,7 @@ public class MainController {
 		});
 
 		layout.setBody(body);
-		
+
 		if(accountView)
 			dialogConnection = new JFXDialog(stackPaneCompte,layout,JFXDialog.DialogTransition.CENTER);
 		else
@@ -455,24 +480,31 @@ public class MainController {
 					System.out.println("User doesn't exist");
 				}else {
 					System.out.println("User exists");
-					
+
 					boolean isAbo = false;
-					if(result.getObject("abonne").toString() == "1")
+					if(result.getObject("abonne").toString().equals("1"))
 						isAbo = true;
-					
+
 					boolean isAdmin = false;
-					if(result.getObject("isAdmin").toString() == "1")
+					if(result.getObject("isAdmin").toString().equals("1"))
 						isAdmin = true;
-					System.out.println(result.getObject("idClient").toString());
+					
 					currentUser = new Utilisateur(Integer.valueOf(result.getObject("idClient").toString()), result.getObject("nom").toString(), result.getObject("mdp").toString(), result.getObject("login").toString(), 
-												  isAbo, Double.valueOf(result.getObject("solde").toString()) , Integer.valueOf(result.getObject("nb_pizza_commande").toString()),isAdmin);
-					
+							isAbo, Double.valueOf(result.getObject("solde").toString()) , Integer.valueOf(result.getObject("nb_pizza_commande").toString()),isAdmin);
+
 					isUserLoggedIn = true; //Set to logged in
-					
+
 					tabPaneCompte.getSelectionModel().select(1);//Change to connected account view
 					lblCompteNom.setText(currentUser.getNom());
 					lblCompteSolde.setText(String.valueOf(currentUser.getSolde()));
 					lblCompteNbPizza.setText(String.valueOf(currentUser.getNbPizzaCommandees()));
+
+					if(currentUser.isAdmin())
+					{
+						System.out.println("Adding pane");
+						mainTabPane.getTabs().add(2, tabBackEnd);
+					}
+
 				}
 			} catch (SQLException e1) {
 				e1.printStackTrace();
@@ -490,5 +522,5 @@ public class MainController {
 		instance.lblCompteSolde.setText(String.valueOf(currentUser.getSolde()));
 		instance.lblCompteNbPizza.setText(String.valueOf(currentUser.getNbPizzaCommandees()));
 	}
-	
+
 }

@@ -91,7 +91,7 @@
          <center>
             <StackPane fx:id="stackPanePizzaDisplay" BorderPane.alignment="CENTER">
                <children>
-                  <JFXTabPane stylesheets="@../css/tabPane.css">
+                  <JFXTabPane fx:id="mainTabPane" stylesheets="@../css/tabPane.css">
                      <tabs>
                         <Tab text="Commander des pizzas">
                            <content>
