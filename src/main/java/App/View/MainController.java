@@ -44,8 +44,13 @@ import javafx.stage.Stage;
 
 public class MainController {
 
-	/**FXML Object **/
+	
+	/**Singleton**/
+	public static MainController instance;
 
+	
+	/**FXML Object **/
+	
 	@FXML
 	private JFXListView<Label> panierList;
 
@@ -110,7 +115,7 @@ public class MainController {
 
 	@FXML
 	public void initialize() {
-
+		instance = this;
 		setEvents();
 
 		pizzaList = new ArrayList<Pizza>();
@@ -352,7 +357,6 @@ public class MainController {
 				PayWindowController.amountTotal = totalPanier.getText();
 				FXMLLoader fxmlLoader = new FXMLLoader();
 				root = fxmlLoader.load(getClass().getClassLoader().getResource("FXML/payWindow.fxml"));
-				PayWindowController cont = fxmlLoader.getController();
 				payStage.setTitle("RaPizz - Payement de la commande");
 				payStage.getIcons().add(new Image("/pizzas/pizza.png"));
 				Scene scene = new Scene(root);
@@ -395,6 +399,7 @@ public class MainController {
 		}	
 	}
 
+	
 	private void connection(boolean accountView) {
 		JFXDialog dialogConnection;
 		JFXDialogLayout layout = new JFXDialogLayout();
@@ -481,4 +486,9 @@ public class MainController {
 		dialogConnection.show();
 	}
 
+	public static void updateClientInformations() {
+		instance.lblCompteSolde.setText(String.valueOf(currentUser.getSolde()));
+		instance.lblCompteNbPizza.setText(String.valueOf(currentUser.getNbPizzaCommandees()));
+	}
+	
 }

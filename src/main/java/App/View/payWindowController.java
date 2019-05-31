@@ -59,6 +59,7 @@ public class PayWindowController {
     			dialogPayOK.show();
     			MainController.currentUser.increaseNbPizzaCommande(MainController.basketContent.size());
     			MainController.currentUser.decreaseSolde(payAmountNb);
+    			MainController.updateClientInformations();
     		}
     	});
     	
