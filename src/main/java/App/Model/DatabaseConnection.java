@@ -37,7 +37,6 @@ public class DatabaseConnection {
 			//Handle errors for JDBC
 			e.printStackTrace();
 		}
-		test();
 	}
 	
 	public void closeConnection(){

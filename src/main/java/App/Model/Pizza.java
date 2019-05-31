@@ -35,4 +35,10 @@ public class Pizza {
 	public void setPrix(double prix) {
 		this.prix = prix;
 	}
+
+	@Override
+	public String toString() {
+		return "Pizza [idPizza=" + idPizza + ", nomPizza=" + nomPizza + ", listIngredients=" + listIngredients
+				+ ", prix=" + prix + "]";
+	}
 }

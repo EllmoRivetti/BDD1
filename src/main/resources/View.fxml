@@ -110,7 +110,7 @@
                         </GridPane>
                      </content>
                      <content>
-                        <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
+                        <TabPane fx:id="tabPaneCompte" prefHeight="200.0" prefWidth="200.0" stylesheets="@css/tabPaneHide.css" tabClosingPolicy="UNAVAILABLE">
                           <tabs>
                             <Tab text="noConnect">
                                  <content>
@@ -126,12 +126,12 @@
                                                 <Font size="16.0" />
                                              </font>
                                           </Label>
-                                          <JFXButton layoutX="277.0" layoutY="348.0" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: #f44336;" text="Se connecter" textFill="WHITE">
+                                          <JFXButton fx:id="btnCompteConnexion" layoutX="277.0" layoutY="348.0" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: #f44336;" text="Se connecter" textFill="WHITE">
                                              <font>
                                                 <Font name="Arial" size="15.0" />
                                              </font>
                                           </JFXButton>
-                                          <JFXButton layoutX="271.0" layoutY="223.0" prefHeight="35.0" prefWidth="130.0" ripplerFill="#c1382e" style="-fx-background-color: #f44336;" text="S'inscrire" textFill="WHITE">
+                                          <JFXButton fx:id="btnCompteInscription" layoutX="271.0" layoutY="223.0" prefHeight="35.0" prefWidth="130.0" ripplerFill="#c1382e" style="-fx-background-color: #f44336;" text="S'inscrire" textFill="WHITE">
                                              <font>
                                                 <Font name="Arial" size="15.0" />
                                              </font>

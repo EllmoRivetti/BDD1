@@ -1,13 +1,20 @@
 package App.View;
 
 import java.io.IOException;
+import java.sql.Array;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXListView;
 import com.jfoenix.controls.JFXMasonryPane;
 
 import App.Model.DatabaseConnection;
+import App.Model.DatabaseManager;
+import App.Model.Pizza;
 import App.Model.Utilisateur;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -72,13 +79,15 @@ public class MainController {
 	
 	private boolean isUserLoggedIn;
 	
+	private boolean isAdmin;
+	
+	private ArrayList<Pizza> pizzaList;
+	
 
 	@FXML
 	public void initialize() {
-		System.out.println("DB Connexion");
-		DatabaseConnection bdConnection = new DatabaseConnection();
-		bdConnection.openConnection();
-		
+		pizzaList = new ArrayList<Pizza>();
+		fillPizzaList();
 		
 		defaultPanierLabel = new Label("Votre panier est vide.");
 		defaultPanierLabel.setStyle("-fx-font-size: 15px;");
@@ -96,27 +105,54 @@ public class MainController {
 		} 	
 		System.out.println("Fin");
 	}
+	
+	private void fillPizzaList() {
+		try {
+			ResultSet result = DatabaseManager.executeQuerry("SELECT * FROM pizza");
+			while(result.next()) {
+					
+				ArrayList<String> ing = new ArrayList<String>();
+				ResultSet resultIng = DatabaseManager.executeQuerry("SELECT i.nom from ingredient as i , ingredientsparpizza as ing WHERE i.idIngredient = ing.idIngredient AND ing.idPizza = "+result.getObject("idPizza").toString());
+				while(resultIng.next())
+					ing.add(resultIng.getObject("nom").toString());
+				
+				 
+				pizzaList.add(new Pizza(Integer.parseInt(result.getObject("idPizza").toString()), result.getObject("nom").toString(), ing, Double.parseDouble(result.getObject("prix_normal").toString())));
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 
 	private void initMasonryPane() throws IOException {
 		pizzaDisplay = new JFXMasonryPane();
 
-		for (int i = 0; i < 25; i++) {
+		for (Pizza p : pizzaList) {
 			VBox v = new VBox();
 			v.setSpacing(15);
 			v.setPadding(new Insets(0, 5, 10, 5));
-			v.setPrefSize(200, 290);
-			v.setMinSize(200, 290);
-			v.setMaxSize(200, 290);
+			v.setPrefSize(200, 350);
+			v.setMinSize(200, 350);
+			v.setMaxSize(200, 350);
 			v.setAlignment(Pos.CENTER);
 
-			ImageView imageView = new ImageView("/pizzas/pizza.png");
-			imageView.resize(100, 100);
+			System.out.println("/pizzas/"+p.getNomPizza().toLowerCase()+".jpg");
+			ImageView imageView = new ImageView("/pizzas/"+p.getNomPizza().toLowerCase()+".jpg");
+			
+			//imageView.resize(100, 100);
 
-			Label pizzaName = new Label("Pizza jolie");
+			Label pizzaName = new Label(p.getNomPizza());
 			pizzaName.setStyle("-fx-font-weight: bold;"
 					+ "-fx-font-size: 20px;");
 
-			Label pizzaIng = new Label("Tomates,  poivrons, viande hachée, sauce dégueu");
+			Label pizzaIng = new Label("");
+			for(String s : p.getListIngredients()) {
+				if(p.getListIngredients().get(0) == s)
+					pizzaIng.setText(pizzaIng.getText()+s);
+				else
+					pizzaIng.setText(pizzaIng.getText()+", "+s);
+			}
 			pizzaIng.setWrapText(true);
 			pizzaIng.setStyle("-fx-text-fill:#546e7a;");
 
@@ -132,17 +168,17 @@ public class MainController {
 			cbPizzaTaille.setPrefWidth(110);
 			cbPizzaTaille.getStylesheets().add("/css/cb.css");
 
-			Label price = new Label("17.50"+" €");
+			Label price = new Label(String.valueOf(p.getPrix())+" €");
 			price.setStyle("-fx-font-weight: bold");
 
 			cbPizzaTaille.getSelectionModel().selectedIndexProperty().addListener(e->{
 				double calculus;
 				if(cbPizzaTaille.getSelectionModel().getSelectedIndex() == 0)
-					calculus = 17.5 - (17.5 * 0.33); //TODO get data from db
+					calculus = p.getPrix() - (p.getPrix() * 0.33);
 				else if(cbPizzaTaille.getSelectionModel().getSelectedIndex() == 2)
-					calculus = 17.5 + (17.5 * 0.33); //TODO get data from db
+					calculus = p.getPrix() + (p.getPrix() * 0.33);
 				else
-					calculus = 17.5; //TODO get data from db
+					calculus = p.getPrix();
 				
 				DecimalFormat df = new DecimalFormat("##.##");
 				price.setText(String.valueOf(df.format(calculus))+" €");
@@ -150,7 +186,6 @@ public class MainController {
 
 
 			JFXButton buttonAdd = new JFXButton("Ajouter au panier");
-			//buttonAdd.getStylesheets().addAll(getClass().getResource("/css/outline.css").toExternalForm());
 			buttonAdd.setOnMouseEntered(e->{
 				buttonAdd.setStyle("-fx-background-color:#087f23;"
 						+ "-fx-text-fill:white;");
