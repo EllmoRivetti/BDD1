@@ -17,7 +17,7 @@ public class Main extends Application {
 			DatabaseManager.launchDatabaseConnection();
 			
 			//Create UI
-			AnchorPane root = FXMLLoader.load(getClass().getClassLoader().getResource("View.fxml"));
+			AnchorPane root = FXMLLoader.load(getClass().getClassLoader().getResource("FXML/View.fxml"));
 			primaryStage.setTitle("RaPizz");
 			primaryStage.getIcons().add(new Image("/pizzas/pizza.png"));
 			Scene scene = new Scene(root,1200,720);

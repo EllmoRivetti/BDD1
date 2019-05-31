@@ -31,5 +31,15 @@ public class DatabaseManager {
 		}
 		return result;
 	}
+	
+	public static void executeUpdate(String querry) {
+		try {
+			Statement state = dbConnection.getConnection().createStatement();
+			int i = state.executeUpdate(querry);
+			System.out.println(i);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 }

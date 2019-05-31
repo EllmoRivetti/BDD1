@@ -9,8 +9,13 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXDialog;
+import com.jfoenix.controls.JFXDialogLayout;
 import com.jfoenix.controls.JFXListView;
 import com.jfoenix.controls.JFXMasonryPane;
+import com.jfoenix.controls.JFXPasswordField;
+import com.jfoenix.controls.JFXTextField;
+import com.sun.security.auth.UserPrincipal;
 
 import App.Model.DatabaseConnection;
 import App.Model.DatabaseManager;
@@ -29,66 +34,88 @@ import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class MainController {
-	
+
 	/**FXML Object **/
-	
+
 	@FXML
 	private JFXListView<Label> panierList;
 
 	@FXML
 	private BorderPane mainPane;
-	
+
 	@FXML
 	private Label totalPanier;
-	
+
 	@FXML
 	private BorderPane panePizzaDisplay;
+
+	@FXML
+	private TabPane tabPaneCompte;
+
+	@FXML
+	private JFXButton btnCompteConnexion;
+	@FXML
+	private JFXButton btnCompteDeco;
+
+	@FXML
+	private JFXButton btnCompteInscription;
+
+	@FXML
+	private Label lblCompteNom;
+
+	@FXML
+	private Label lblCompteSolde;
+	@FXML
+	private Label lblCompteNbPizza;
+
+	@FXML
+	private StackPane stackPaneCompte;
 	
 	@FXML
-    private TabPane tabPaneCompte;
+	private StackPane stackPanePizzaDisplay;
 
-    @FXML
-    private JFXButton btnCompteConnexion;
 
-    @FXML
-    private JFXButton btnCompteInscription;
 
-    @FXML
-    private Label lblCompteNom;
-
-    @FXML
-    private Label lblCompteSolde;
-    
-    
-    
-    /**Class Object **/
+	/**Class Object **/
 
 	private JFXMasonryPane pizzaDisplay;
 
 	private ScrollPane mainScrollPane;
 
 	private Label defaultPanierLabel;
+
+	public static Utilisateur currentUser = null;
 	
-	private Utilisateur currentUser;
+	public static double amountbasket = 0;
 	
+	public static ArrayList<String> basketContent = new ArrayList<String>();
+	
+	public static Stage payStage;
+	
+	public static Stage registerStage;
+
 	private boolean isUserLoggedIn;
-	
-	private boolean isAdmin;
-	
+
 	private ArrayList<Pizza> pizzaList;
-	
+
 
 	@FXML
 	public void initialize() {
+
+		setEvents();
+
 		pizzaList = new ArrayList<Pizza>();
 		fillPizzaList();
-		
+
 		defaultPanierLabel = new Label("Votre panier est vide.");
 		defaultPanierLabel.setStyle("-fx-font-size: 15px;");
 
@@ -102,24 +129,64 @@ public class MainController {
 			panePizzaDisplay.setCenter(mainScrollPane);
 		} catch (IOException e) {
 			e.printStackTrace();
-		} 	
-		System.out.println("Fin");
+		}
 	}
-	
+
+	private void setEvents() {
+		btnCompteConnexion.setOnAction(e->{
+			connection(true);
+		});
+		
+		btnCompteDeco.setOnAction(e->{
+			tabPaneCompte.getSelectionModel().select(0);
+			JFXDialogLayout layout = new JFXDialogLayout();
+	    	layout.setHeading(new Text("Information"));
+	    	layout.setBody(new Text("Vous avez été déconnecté"));
+	    	JFXDialog dialog = new JFXDialog(stackPaneCompte,layout,JFXDialog.DialogTransition.CENTER);
+	    	
+	    	JFXButton btnOk= new JFXButton("Ok");
+	    	btnOk.setRipplerFill(Paint.valueOf("#80e27e"));
+	    	btnOk.setStyle("-fx-background-color:#4caf50;");
+	    	btnOk.setOnMouseEntered(i->{
+	    		btnOk.setStyle("-fx-background-color:#087f23;"
+						+ "-fx-text-fill:white;");
+			});
+
+	    	btnOk.setOnMouseExited(i->{
+	    		btnOk.setStyle("-fx-background-color:#4caf50;"
+						+ "-fx-text-fill:black;");
+			});
+	    	
+	    	btnOk.setOnAction(i->{
+	    		dialog.close();
+	    	});
+	    	
+	    	layout.setActions(btnOk);
+	    	
+	    	dialog.show();
+	    	currentUser = null;
+	    	isUserLoggedIn = false;
+		});
+		
+		btnCompteInscription.setOnAction(e->{
+			register();
+		});
+	}
+
 	private void fillPizzaList() {
 		try {
 			ResultSet result = DatabaseManager.executeQuerry("SELECT * FROM pizza");
 			while(result.next()) {
-					
+
 				ArrayList<String> ing = new ArrayList<String>();
 				ResultSet resultIng = DatabaseManager.executeQuerry("SELECT i.nom from ingredient as i , ingredientsparpizza as ing WHERE i.idIngredient = ing.idIngredient AND ing.idPizza = "+result.getObject("idPizza").toString());
 				while(resultIng.next())
 					ing.add(resultIng.getObject("nom").toString());
-				
-				 
+
+
 				pizzaList.add(new Pizza(Integer.parseInt(result.getObject("idPizza").toString()), result.getObject("nom").toString(), ing, Double.parseDouble(result.getObject("prix_normal").toString())));
 			}
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -137,9 +204,8 @@ public class MainController {
 			v.setMaxSize(200, 350);
 			v.setAlignment(Pos.CENTER);
 
-			System.out.println("/pizzas/"+p.getNomPizza().toLowerCase()+".jpg");
 			ImageView imageView = new ImageView("/pizzas/"+p.getNomPizza().toLowerCase()+".jpg");
-			
+
 			//imageView.resize(100, 100);
 
 			Label pizzaName = new Label(p.getNomPizza());
@@ -179,7 +245,7 @@ public class MainController {
 					calculus = p.getPrix() + (p.getPrix() * 0.33);
 				else
 					calculus = p.getPrix();
-				
+
 				DecimalFormat df = new DecimalFormat("##.##");
 				price.setText(String.valueOf(df.format(calculus))+" €");
 			});
@@ -195,7 +261,7 @@ public class MainController {
 				buttonAdd.setStyle("-fx-background-color:#4caf50;"
 						+ "-fx-text-fill:black;");
 			});
-			
+
 			buttonAdd.setOnAction(e->{
 				addToBasket(pizzaName.getText(), cbPizzaTaille.getSelectionModel().getSelectedIndex(), price.getText());
 			});
@@ -224,27 +290,79 @@ public class MainController {
 		pizzaDisplay.setPadding(new Insets(10, 10, 10, 10));
 	}
 
-	@FXML
-	void commander(ActionEvent event) {
-		Stage payStage = new Stage();
-		payStage.setAlwaysOnTop(true);
-		payStage.initModality(Modality.APPLICATION_MODAL);
+	void register() {
+		registerStage = new Stage();
+		registerStage.setAlwaysOnTop(true);
+		registerStage.initModality(Modality.APPLICATION_MODAL);
 		BorderPane root;
 		try {
-			payWindowController.amountTotal = totalPanier.getText();
 			FXMLLoader fxmlLoader = new FXMLLoader();
-			root = fxmlLoader.load(getClass().getClassLoader().getResource("payWindow.fxml"));
-			payWindowController cont = fxmlLoader.getController();
-			payStage.setTitle("RaPizz - Payement de la commande");
-			payStage.getIcons().add(new Image("/pizzas/pizza.png"));
+			root = fxmlLoader.load(getClass().getClassLoader().getResource("FXML/registerView.fxml"));
+			registerStage.setTitle("RaPizz - Création d'un compte");
+			registerStage.getIcons().add(new Image("/pizzas/pizza.png"));
 			Scene scene = new Scene(root);
-			payStage.setScene(scene);
-			payStage.setResizable(false);
-			payStage.show();
+			registerStage.setScene(scene);
+			registerStage.setResizable(false);
+			registerStage.show();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	@FXML
+	void commander(ActionEvent event) {
 		
+		if(!isUserLoggedIn) {
+			JFXDialogLayout layout = new JFXDialogLayout();
+	    	layout.setHeading(new Text("Information"));
+	    	layout.setBody(new Text("Veuillez vous connecter avant de commander"));
+	    	JFXDialog dialog = new JFXDialog(stackPanePizzaDisplay,layout,JFXDialog.DialogTransition.CENTER);
+	    	dialog.setOnDialogClosed(e->{
+	    		connection(false);
+	    	});
+	    	
+	    	JFXButton btnOk= new JFXButton("Ok");
+	    	btnOk.setRipplerFill(Paint.valueOf("#80e27e"));
+	    	btnOk.setStyle("-fx-background-color:#4caf50;");
+	    	
+	    	btnOk.setOnMouseEntered(i->{
+	    		btnOk.setStyle("-fx-background-color:#087f23;"
+						+ "-fx-text-fill:white;");
+			});
+
+	    	btnOk.setOnMouseExited(i->{
+	    		btnOk.setStyle("-fx-background-color:#4caf50;"
+						+ "-fx-text-fill:black;");
+			});
+	    	
+	    	btnOk.setOnAction(i->{
+	    		dialog.close();
+	    	});
+	    	
+	    	layout.setActions(btnOk);
+	    	
+	    	dialog.show();
+		}
+		else {
+			payStage = new Stage();
+			payStage.setAlwaysOnTop(true);
+			payStage.initModality(Modality.APPLICATION_MODAL);
+			BorderPane root;
+			try {
+				PayWindowController.amountTotal = totalPanier.getText();
+				FXMLLoader fxmlLoader = new FXMLLoader();
+				root = fxmlLoader.load(getClass().getClassLoader().getResource("FXML/payWindow.fxml"));
+				PayWindowController cont = fxmlLoader.getController();
+				payStage.setTitle("RaPizz - Payement de la commande");
+				payStage.getIcons().add(new Image("/pizzas/pizza.png"));
+				Scene scene = new Scene(root);
+				payStage.setScene(scene);
+				payStage.setResizable(false);
+				payStage.show();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	void addToBasket(String nom, int size, String prix) {
@@ -252,30 +370,115 @@ public class MainController {
 			if(panierList.getItems().get(0).equals(defaultPanierLabel)) {
 				panierList.getItems().remove(0);
 			}
-			
+
 			prix = prix.replace(",", ".");
 			String temp = totalPanier.getText().split(" ")[0].replace(",",".");
 			double old = Double.parseDouble(temp);
-			
+
 			double calculus =  old + Double.parseDouble(prix.split(" ")[0]);
 			DecimalFormat df = new DecimalFormat("##.##");
 			totalPanier.setText(String.valueOf(df.format(calculus))+" €");
-			
+			amountbasket = calculus;
+
 			String taille = "Humaine";
 			if(size == 0)
 				taille = "Naine";
 			else if (size == 2)
 				taille = "Ogresse";
-				
-			
+
+
 			Label displayLab = new Label(nom+" en taille "+taille +" : "+prix);
 			displayLab.setStyle("-fx-font-weight: bold;"
 					+ "-fx-font-size: 15px;");
 			panierList.getItems().add(displayLab);
+			basketContent.add(displayLab.getText());
 		}	
 	}
-	
-	
 
+	private void connection(boolean accountView) {
+		JFXDialog dialogConnection;
+		JFXDialogLayout layout = new JFXDialogLayout();
+		layout.setHeading(new Text("Entrez vos identifiants"));
+
+
+		GridPane body = new GridPane();
+		body.setHgap(15);
+
+		Label lblLogin = new Label("Login :");
+		lblLogin.setStyle("-fx-font-size: 15px;");
+		GridPane.setConstraints(lblLogin, 0, 0);
+
+		Label lblpwd = new Label("Mot de passe :");
+		lblpwd.setStyle("-fx-font-size: 15px;");
+		GridPane.setConstraints(lblpwd, 0, 1);
+
+		JFXTextField loginField = new JFXTextField();
+		loginField.setFocusColor(Paint.valueOf("#f44336"));
+		GridPane.setConstraints(loginField, 1, 0);
+
+
+		JFXPasswordField passwordField = new JFXPasswordField();
+		passwordField.setFocusColor(Paint.valueOf("#f44336"));
+		GridPane.setConstraints(passwordField, 1, 1);
+
+		body.getChildren().addAll(lblLogin,lblpwd,loginField,passwordField);
+
+		layout.setBody(body);
+		JFXButton btnCo= new JFXButton("Connexion");
+		btnCo.setOnMouseEntered(e->{
+			btnCo.setStyle("-fx-background-color:#087f23;"
+					+ "-fx-text-fill:white;");
+		});
+
+		btnCo.setOnMouseExited(e->{
+			btnCo.setStyle("-fx-background-color:#4caf50;"
+					+ "-fx-text-fill:black;");
+		});
+
+		layout.setBody(body);
+		
+		if(accountView)
+			dialogConnection = new JFXDialog(stackPaneCompte,layout,JFXDialog.DialogTransition.CENTER);
+		else
+			dialogConnection = new JFXDialog(stackPanePizzaDisplay,layout,JFXDialog.DialogTransition.CENTER);
+
+		btnCo.setOnAction(e->{
+			dialogConnection.close();
+			ResultSet result = DatabaseManager.executeQuerry("SELECT * FROM client WHERE login='"+loginField.getText()+"' AND mdp='"+passwordField.getText()+"'");
+			try {
+				if(!result.next()) {//Check if user exists
+					System.out.println("User doesn't exist");
+				}else {
+					System.out.println("User exists");
+					
+					boolean isAbo = false;
+					if(result.getObject("abonne").toString() == "1")
+						isAbo = true;
+					
+					boolean isAdmin = false;
+					if(result.getObject("isAdmin").toString() == "1")
+						isAdmin = true;
+					System.out.println(result.getObject("idClient").toString());
+					currentUser = new Utilisateur(Integer.valueOf(result.getObject("idClient").toString()), result.getObject("nom").toString(), result.getObject("mdp").toString(), result.getObject("login").toString(), 
+												  isAbo, Double.valueOf(result.getObject("solde").toString()) , Integer.valueOf(result.getObject("nb_pizza_commande").toString()),isAdmin);
+					
+					isUserLoggedIn = true; //Set to logged in
+					
+					tabPaneCompte.getSelectionModel().select(1);//Change to connected account view
+					lblCompteNom.setText(currentUser.getNom());
+					lblCompteSolde.setText(String.valueOf(currentUser.getSolde()));
+					lblCompteNbPizza.setText(String.valueOf(currentUser.getNbPizzaCommandees()));
+				}
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+		});
+
+		btnCo.setRipplerFill(Paint.valueOf("#80e27e"));
+		btnCo.setStyle("-fx-background-color:#4caf50;");
+		layout.setActions(btnCo);
+
+		dialogConnection.show();
+	}
 
 }

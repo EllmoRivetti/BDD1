@@ -1,27 +1,38 @@
 package App.Model;
 
+
+/**
+ * @author Billy
+ *
+ */
 public class Utilisateur {
+	private int id;
+	
 	private String nom;
 	private String motDePasse;
 	private String login;
 	
 	private boolean abonneStatus;
+	private boolean admin;
 	private double solde;
 	private int nbPizzaCommandees;
 	
-	public Utilisateur(String nom, String mdp, String login) {
+	public Utilisateur(int id, String nom, String mdp, String login) {
+		this.id = id;
 		this.nom = nom;
 		this.motDePasse = mdp;
 		this.login = login;
 	}
 	
-	public Utilisateur(String nom, String mdp, String login, boolean abo, double s, int nbPizza) {
+	public Utilisateur(int id, String nom, String mdp, String login, boolean abo, double s, int nbPizza, boolean admin) {
+		this.id = id;
 		this.nom = nom;
 		this.motDePasse = mdp;
 		this.login = login;
 		this.abonneStatus = abo;
 		this.solde = s;
 		this.nbPizzaCommandees = nbPizza;
+		this.admin = admin;
 	}
 
 	public String getNom() {
@@ -70,5 +81,31 @@ public class Utilisateur {
 
 	public void setNbPizzaCommandees(int nbPizzaCommandees) {
 		this.nbPizzaCommandees = nbPizzaCommandees;
+	}
+
+	public boolean isAdmin() {
+		return admin;
+	}
+
+	public void setAdmin(boolean admin) {
+		this.admin = admin;
+	}
+	
+	public void decreaseSolde(double n) {
+		this.solde -= n;
+		System.out.println("UPDATE client SET solde = '"+this.solde+"' WHERE client.idClient = "+id);
+		DatabaseManager.executeUpdate("UPDATE client SET solde = '"+this.solde+"' WHERE client.idClient = "+id);
+	}
+	
+	public void increaseSolde(double n) {
+		this.solde += n;
+		System.out.println("UPDATE client SET solde = '"+this.solde+"' WHERE client.idClient = "+id);
+		DatabaseManager.executeUpdate("UPDATE client SET solde = '"+this.solde+"' WHERE client.idClient = "+id);
+	}
+	
+	public void increaseNbPizzaCommande(int i) {
+		this.nbPizzaCommandees += i;
+		System.out.println("UPDATE client SET nb_pizza_commande = '"+this.nbPizzaCommandees+"' WHERE client.idClient = "+id);
+		DatabaseManager.executeUpdate("UPDATE client SET nb_pizza_commande = '"+this.nbPizzaCommandees+"' WHERE client.idClient = "+id);
 	}
 }

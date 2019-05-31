@@ -1,7 +1,8 @@
 App\Model\DatabaseConnection.class
 App\Model\DatabaseManager.class
 App\Main.class
-App\View\payWindowController.class
+App\View\RegisterController.class
 App\Model\Pizza.class
 App\View\MainController.class
+App\View\PayWindowController.class
 App\Model\Utilisateur.class

@@ -11,8 +11,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
-
-<BorderPane prefHeight="260.0" prefWidth="600.0" style="-fx-background-color: #f44336;" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="App.View.payWindowController">
+<BorderPane prefHeight="260.0" prefWidth="600.0" style="-fx-background-color: #f44336;" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="App.View.PayWindowController">
    <top>
       <Label text="Payer votre commande" textFill="WHITE" BorderPane.alignment="CENTER">
          <BorderPane.margin>
@@ -38,7 +37,7 @@
               </rowConstraints>
                <children>
                   <JFXListView fx:id="recapList" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.rowSpan="2" />
-                  <JFXButton fx:id="btnPay" ripplerFill="#80e27e" style="-fx-background-color: #4caf50;" text="Payer" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                  <JFXButton fx:id="btnPay" ripplerFill="#80e27e" style="-fx-background-color: #4caf50;" text="Payer" textFill="WHITE" GridPane.halignment="CENTER" GridPane.rowIndex="2">
                      <font>
                         <Font size="20.0" />
                      </font>
