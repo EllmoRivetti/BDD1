@@ -1,3 +1,4 @@
+App\View\BackEndController.class
 App\Model\DatabaseConnection.class
 App\Model\DatabaseManager.class
 App\Main.class
