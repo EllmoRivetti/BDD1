@@ -3,6 +3,7 @@ package App.View;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXListView;
 
 import App.Model.DatabaseManager;
@@ -10,7 +11,7 @@ import javafx.fxml.FXML;
 
 public class BackEndController {
 	@FXML
-	private JFXListView<?> listCommandes;
+	private JFXListView<String> listCommandes;
 
 	@FXML
 	private JFXListView<String> listVehiculesDispo;
@@ -24,10 +25,22 @@ public class BackEndController {
 	@FXML
 	private JFXListView<String> listVehiculesNonDispo;
 	
+	@FXML
+	private JFXButton btnMAJ;
 	
 	@FXML
 	public void initialize() {
 		fillLists();
+		fillCommandeHistory();
+		btnMAJ.setOnAction(e->{
+			listVehiculesDispo.getItems().clear();
+			listLivreursDispo.getItems().clear();
+			listLivreursNonDispo.getItems().clear();
+			listVehiculesNonDispo.getItems().clear();
+			listCommandes.getItems().clear();
+			fillLists();
+			fillCommandeHistory();
+		});
 	}
 
 	
@@ -51,10 +64,57 @@ public class BackEndController {
 				listVehiculesDispo.getItems().add(resultVehiculeDispo.getObject("nom").toString());
 			}	
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
+
+	private void fillCommandeHistory() {
+		
+		ResultSet resultCommandes = DatabaseManager.executeQuerry("SELECT * FROM commande");
+		try {
+			while(resultCommandes.next()) {
+				System.out.println(resultCommandes.getObject("client").toString());
+				ResultSet resultNomClient = DatabaseManager.executeQuerry("SELECT nom FROM client WHERE idClient = "+resultCommandes.getObject("client").toString());
+				String nomClient = "";
+				while(resultNomClient.next()) {
+					nomClient = resultNomClient.getObject("nom").toString();
+					System.out.println(nomClient);
+					break;
+				}
+				
+				ResultSet resultPizzaCommande = DatabaseManager.executeQuerry("SELECT nom FROM pizza p, pizzaparcommande ppc WHERE p.idPizza = ppc.idPizza and ppc.idCommande ="+resultCommandes.getObject("idCommande").toString());
+				String pizzas = "";
+				
+				while(resultPizzaCommande.next()) {
+					pizzas+=" "+resultPizzaCommande.getObject(1).toString();
+				}
+				
+				ResultSet resultLivraison = DatabaseManager.executeQuerry("SELECT * FROM livraison WHERE commande = "+resultCommandes.getObject("idCommande").toString());
+				String timeStampDeb = "";
+				String timeStampFin ="";
+				while(resultLivraison.next()) {
+					timeStampDeb = resultLivraison.getObject("ts_commande").toString();
+					try {
+						timeStampFin = resultLivraison.getObject("ts_livraison").toString();
+					}catch(NullPointerException e) {
+						timeStampFin = "NULL";
+					}
+					break;
+				}
+				
+				ResultSet resultLivreur = DatabaseManager.executeQuerry("SELECT nom FROM livreur WHERE idLivreur="+resultCommandes.getObject("livreur").toString());
+				String nomLivreur = "";
+				while(resultLivreur.next()) {
+					nomLivreur = resultLivreur.getObject(1).toString();
+					break;
+				}
+				
+				String text = "Commande par "+nomClient+" contenant "+ pizzas +" commandée le " + timeStampDeb +" livré par "+ nomLivreur +" a " + timeStampFin;
+				listCommandes.getItems().add(text);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 	
 }

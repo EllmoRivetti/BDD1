@@ -167,7 +167,8 @@ public class MainController {
 
 		btnCompteDeco.setOnAction(e->{
 			mainTabPane.getSelectionModel().select(1);
-			mainTabPane.getTabs().remove(2);
+			if(currentUser.isAdmin())
+				mainTabPane.getTabs().remove(2);
 			tabPaneCompte.getSelectionModel().select(0);
 			JFXDialogLayout layout = new JFXDialogLayout();
 			layout.setHeading(new Text("Information"));

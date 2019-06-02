@@ -108,4 +108,12 @@ public class Utilisateur {
 		System.out.println("UPDATE client SET nb_pizza_commande = '"+this.nbPizzaCommandees+"' WHERE client.idClient = "+id);
 		DatabaseManager.executeUpdate("UPDATE client SET nb_pizza_commande = '"+this.nbPizzaCommandees+"' WHERE client.idClient = "+id);
 	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
 }

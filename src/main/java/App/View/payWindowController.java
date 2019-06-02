@@ -1,5 +1,7 @@
 package App.View;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import com.jfoenix.controls.JFXButton;
@@ -8,6 +10,7 @@ import com.jfoenix.controls.JFXDialogLayout;
 import com.jfoenix.controls.JFXListView;
 import com.jfoenix.controls.JFXPopup;
 
+import App.Model.DatabaseManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
@@ -37,8 +40,6 @@ public class PayWindowController {
     
     public static String amountTotal = "0 €";
     
-    public static ArrayList<Label> arrayPizza= new ArrayList<Label>();//TODO utiliser pour passer les données des pizzas du recap
-    
     private JFXDialog dialogPayOK;
     private JFXDialog dialogPayNotOK;
     
@@ -56,10 +57,7 @@ public class PayWindowController {
     		if(soldeAmountNb < payAmountNb) {
     			dialogPayNotOK.show();
     		}else {
-    			dialogPayOK.show();
-    			MainController.currentUser.increaseNbPizzaCommande(MainController.basketContent.size());
-    			MainController.currentUser.decreaseSolde(payAmountNb);
-    			MainController.updateClientInformations();
+    			registerCommand();
     		}
     	});
     	
@@ -70,6 +68,61 @@ public class PayWindowController {
 					+ "-fx-font-size: 15px;");
 			recapList.getItems().add(displayLab);
     	}
+    }
+    
+    private void registerCommand() {
+    	dialogPayOK.show();
+		MainController.currentUser.increaseNbPizzaCommande(MainController.basketContent.size());
+		MainController.currentUser.decreaseSolde(payAmountNb);
+		MainController.updateClientInformations();
+		
+		
+		//Create command
+		ResultSet resultLivreurLibre = DatabaseManager.executeQuerry("SELECT idLivreur FROM livreur WHERE statut = 0");
+		ResultSet resultVehiculeDispo = DatabaseManager.executeQuerry("SELECT idVehicule FROM vehicule v where not exists (SELECT * FROM vehicule x , livreur l WHERE v.nom = x.nom and l.statut = 1 and l.vehicule = v.idVehicule)");
+		
+		
+		try {
+			String idLivreur = null;
+			while(resultLivreurLibre.next()) {
+				System.out.println(resultLivreurLibre.getObject("idLivreur").toString());
+				idLivreur = resultLivreurLibre.getObject("idLivreur").toString();				
+				break;
+			}
+			DatabaseManager.executeUpdate("INSERT INTO commande (livreur,client,prix) VALUES("+idLivreur+","+MainController.currentUser.getId()+","+payAmountNb+")");
+			ResultSet resultIdCommande = DatabaseManager.executeQuerry("SELECT idCommande FROM commande WHERE livreur="+idLivreur+" and client="+MainController.currentUser.getId()+" and prix="+payAmountNb);
+			
+			String idCommande = null ;
+			while(resultIdCommande.next()) {
+				System.out.println(resultIdCommande.getObject("idCommande").toString());
+				idCommande = resultIdCommande.getObject("idCommande").toString();
+				break;
+			}	
+			
+			DatabaseManager.executeUpdate("INSERT INTO livraison (commande) VALUES ("+idCommande+")"); 
+			
+			for(String s : MainController.basketContent) {
+				String nomPizza = s.split(" en taille ")[0];
+				System.out.println(nomPizza);
+				ResultSet resultIdPizza = DatabaseManager.executeQuerry("SELECT idPizza FROM pizza WHERE nom ='"+nomPizza+"'");
+				
+				while(resultIdPizza.next()) {
+					DatabaseManager.executeUpdate("INSERT INTO pizzaparcommande (idCommande,idPizza) VALUES ("+idCommande+","+resultIdPizza.getObject(1).toString()+")"); 
+					break;
+				}
+			}
+			
+			//Update du livreur 
+			DatabaseManager.executeUpdate("UPDATE livreur SET statut = '1' WHERE livreur.idLivreur = "+idLivreur);
+			while(resultVehiculeDispo.next()) {
+				DatabaseManager.executeUpdate("UPDATE livreur SET vehicule = "+ resultVehiculeDispo.getObject("idVehicule").toString() +" WHERE livreur.idLivreur = "+idLivreur);
+				break;
+			}
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
     
     private void initDialog() {
