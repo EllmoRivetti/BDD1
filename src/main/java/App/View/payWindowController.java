@@ -85,7 +85,6 @@ public class PayWindowController {
 		try {
 			String idLivreur = null;
 			while(resultLivreurLibre.next()) {
-				System.out.println(resultLivreurLibre.getObject("idLivreur").toString());
 				idLivreur = resultLivreurLibre.getObject("idLivreur").toString();				
 				break;
 			}
@@ -94,16 +93,14 @@ public class PayWindowController {
 			
 			String idCommande = null ;
 			while(resultIdCommande.next()) {
-				System.out.println(resultIdCommande.getObject("idCommande").toString());
 				idCommande = resultIdCommande.getObject("idCommande").toString();
 				break;
 			}	
-			
+			System.out.println(idCommande);
 			DatabaseManager.executeUpdate("INSERT INTO livraison (commande) VALUES ("+idCommande+")"); 
 			
 			for(String s : MainController.basketContent) {
 				String nomPizza = s.split(" en taille ")[0];
-				System.out.println(nomPizza);
 				ResultSet resultIdPizza = DatabaseManager.executeQuerry("SELECT idPizza FROM pizza WHERE nom ='"+nomPizza+"'");
 				
 				while(resultIdPizza.next()) {
@@ -120,7 +117,6 @@ public class PayWindowController {
 			}
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     }

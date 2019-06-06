@@ -93,6 +93,8 @@ public class MainController {
 	@FXML
 	private StackPane stackPanePizzaDisplay;
 
+	@FXML
+	private JFXButton btnAddSolde;
 
 
 	/**Class Object **/
@@ -201,6 +203,12 @@ public class MainController {
 
 		btnCompteInscription.setOnAction(e->{
 			register();
+		});
+		
+		btnAddSolde.setOnAction(e->{
+			currentUser.setSolde(currentUser.getSolde()+100);
+			lblCompteSolde.setText(String.valueOf(currentUser.getSolde()));
+			lblCompteNbPizza.setText(String.valueOf(currentUser.getNbPizzaCommandees()));
 		});
 	}
 
@@ -392,6 +400,9 @@ public class MainController {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			panierList.getItems().clear();
+			pizzaList.clear();
+			panierList.getItems().add(defaultPanierLabel);
 		}
 	}
 
