@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: May 31, 2019 at 03:29 PM
+-- Generation Time: Jun 16, 2019 at 02:15 PM
 -- Server version: 5.7.24
 -- PHP Version: 7.2.14
 
@@ -39,21 +39,16 @@ CREATE TABLE IF NOT EXISTS `client` (
   `solde` float NOT NULL DEFAULT '0',
   `nb_pizza_commande` int(2) NOT NULL DEFAULT '0',
   PRIMARY KEY (`idClient`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `client`
 --
 
 INSERT INTO `client` (`idClient`, `isAdmin`, `nom`, `login`, `mdp`, `abonne`, `solde`, `nb_pizza_commande`) VALUES
-(1, 1, 'admin', 'admin', 'admin', 1, 0, 0),
-(2, 0, 'Billy', 'Billy', 'billy78', 1, 982, 2),
-(3, 0, 'test', 'test', 'test', 0, 0, 0),
-(4, 0, 'test2', 'test2', 'test2', 0, 0, 0),
-(5, 0, 'tes', 'tes', 'tes', 0, 0, 0),
-(6, 0, 'tes', 'tes', 'tes', 0, 0, 0),
-(7, 0, 'testapp', 'testapp', 'testapp', 0, 0, 0),
-(8, 0, 'aze', 'azea', 'azeaze', 0, 0, 0);
+(1, 1, 'admin', 'admin', 'admin', 1, 916, 10),
+(2, 0, 'Billy', 'Billy', 'billy78', 1, 80.36, 2),
+(16, 0, 'testDemo', 'testDemo', 'test', 0, 82, 2);
 
 -- --------------------------------------------------------
 
@@ -64,14 +59,20 @@ INSERT INTO `client` (`idClient`, `isAdmin`, `nom`, `login`, `mdp`, `abonne`, `s
 DROP TABLE IF EXISTS `commande`;
 CREATE TABLE IF NOT EXISTS `commande` (
   `idCommande` int(11) NOT NULL AUTO_INCREMENT,
-  `pizza` int(11) NOT NULL,
   `livreur` int(11) NOT NULL,
   `client` int(11) NOT NULL,
+  `prix` float NOT NULL,
   PRIMARY KEY (`idCommande`),
-  KEY `pizza` (`pizza`),
   KEY `livreur` (`livreur`),
   KEY `client` (`client`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `commande`
+--
+
+INSERT INTO `commande` (`idCommande`, `livreur`, `client`, `prix`) VALUES
+(15, 2, 16, 18);
 
 -- --------------------------------------------------------
 
@@ -128,59 +129,57 @@ INSERT INTO `ingredient` (`idIngredient`, `nom`) VALUES
 
 DROP TABLE IF EXISTS `ingredientsparpizza`;
 CREATE TABLE IF NOT EXISTS `ingredientsparpizza` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
   `idIngredient` int(11) NOT NULL,
   `idPizza` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
   KEY `idIngredient` (`idIngredient`),
   KEY `idPizza` (`idPizza`)
-) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `ingredientsparpizza`
 --
 
-INSERT INTO `ingredientsparpizza` (`id`, `idIngredient`, `idPizza`) VALUES
-(2, 2, 1),
-(13, 2, 5),
-(14, 9, 5),
-(15, 8, 5),
-(16, 7, 5),
-(17, 6, 5),
-(19, 2, 6),
-(20, 11, 6),
-(21, 5, 6),
-(22, 5, 6),
-(24, 2, 7),
-(25, 11, 7),
-(26, 10, 7),
-(27, 10, 7),
-(29, 2, 8),
-(30, 6, 8),
-(31, 6, 8),
-(33, 2, 9),
-(34, 5, 9),
-(35, 8, 9),
-(36, 12, 9),
-(37, 28, 9),
-(38, 1, 10),
-(39, 2, 10),
-(40, 13, 10),
-(41, 8, 10),
-(42, 14, 10),
-(43, 28, 10),
-(44, 1, 11),
-(45, 2, 11),
-(46, 2, 11),
-(47, 15, 11),
-(48, 15, 11),
-(49, 17, 12),
-(50, 2, 12),
-(51, 11, 12),
-(52, 13, 12),
-(53, 16, 12),
-(54, 5, 12),
-(55, 8, 12);
+INSERT INTO `ingredientsparpizza` (`idIngredient`, `idPizza`) VALUES
+(2, 1),
+(2, 5),
+(9, 5),
+(8, 5),
+(7, 5),
+(6, 5),
+(2, 6),
+(11, 6),
+(5, 6),
+(5, 6),
+(2, 7),
+(11, 7),
+(10, 7),
+(10, 7),
+(2, 8),
+(6, 8),
+(6, 8),
+(2, 9),
+(5, 9),
+(8, 9),
+(12, 9),
+(28, 9),
+(1, 10),
+(2, 10),
+(13, 10),
+(8, 10),
+(14, 10),
+(28, 10),
+(1, 11),
+(2, 11),
+(2, 11),
+(15, 11),
+(15, 11),
+(17, 12),
+(2, 12),
+(11, 12),
+(13, 12),
+(16, 12),
+(5, 12),
+(8, 12);
 
 -- --------------------------------------------------------
 
@@ -190,13 +189,18 @@ INSERT INTO `ingredientsparpizza` (`id`, `idIngredient`, `idPizza`) VALUES
 
 DROP TABLE IF EXISTS `livraison`;
 CREATE TABLE IF NOT EXISTS `livraison` (
-  `idLivraison` int(11) NOT NULL AUTO_INCREMENT,
   `commande` int(11) NOT NULL,
-  `ts_commande` timestamp NOT NULL,
-  `ts_livraison` timestamp NOT NULL,
-  PRIMARY KEY (`idLivraison`),
+  `ts_commande` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `ts_livraison` timestamp NULL DEFAULT NULL,
   KEY `commande` (`commande`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `livraison`
+--
+
+INSERT INTO `livraison` (`commande`, `ts_commande`, `ts_livraison`) VALUES
+(15, '2019-06-05 20:55:13', NULL);
 
 -- --------------------------------------------------------
 
@@ -208,18 +212,21 @@ DROP TABLE IF EXISTS `livreur`;
 CREATE TABLE IF NOT EXISTS `livreur` (
   `idLivreur` int(4) NOT NULL AUTO_INCREMENT,
   `nom` varchar(250) NOT NULL,
-  `vehicule` int(4) NOT NULL,
+  `vehicule` int(4) DEFAULT NULL,
   `statut` int(3) NOT NULL,
   PRIMARY KEY (`idLivreur`),
   KEY `vehicule` (`vehicule`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `livreur`
 --
 
 INSERT INTO `livreur` (`idLivreur`, `nom`, `vehicule`, `statut`) VALUES
-(1, 'Billy', 1, 0);
+(1, 'Billy', 1, 1),
+(2, 'Bruce Wayne', 2, 1),
+(3, 'Peter Quill', 3, 0),
+(4, 'Steve Rogers', 4, 0);
 
 -- --------------------------------------------------------
 
@@ -233,7 +240,7 @@ CREATE TABLE IF NOT EXISTS `pizza` (
   `nom` varchar(50) NOT NULL,
   `prix_normal` float NOT NULL,
   PRIMARY KEY (`idPizza`)
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `pizza`
@@ -259,6 +266,28 @@ INSERT INTO `pizza` (`idPizza`, `nom`, `prix_normal`) VALUES
 (22, 'Kasbah', 9),
 (23, '4 Fromages', 9),
 (24, 'Nordique', 9);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pizzaparcommande`
+--
+
+DROP TABLE IF EXISTS `pizzaparcommande`;
+CREATE TABLE IF NOT EXISTS `pizzaparcommande` (
+  `idCommande` int(11) NOT NULL,
+  `idPizza` int(11) NOT NULL,
+  KEY `ix_idCommande` (`idCommande`),
+  KEY `ix_idPizza` (`idPizza`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `pizzaparcommande`
+--
+
+INSERT INTO `pizzaparcommande` (`idCommande`, `idPizza`) VALUES
+(15, 1),
+(15, 1);
 
 -- --------------------------------------------------------
 
@@ -295,7 +324,7 @@ CREATE TABLE IF NOT EXISTS `vehicule` (
   `type` int(11) NOT NULL,
   PRIMARY KEY (`idVehicule`),
   KEY `type` (`type`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `vehicule`
@@ -303,9 +332,10 @@ CREATE TABLE IF NOT EXISTS `vehicule` (
 
 INSERT INTO `vehicule` (`idVehicule`, `nom`, `type`) VALUES
 (1, 'moto 1', 1),
-(2, 'moto 2', 1),
+(2, 'BatMoto', 1),
 (3, 'voiture 1', 2),
-(4, 'trotinette 1', 3);
+(4, 'trotinette 1', 3),
+(5, 'BatTrotinette', 3);
 
 --
 -- Constraints for dumped tables
@@ -316,8 +346,7 @@ INSERT INTO `vehicule` (`idVehicule`, `nom`, `type`) VALUES
 --
 ALTER TABLE `commande`
   ADD CONSTRAINT `fk_client` FOREIGN KEY (`client`) REFERENCES `client` (`idClient`),
-  ADD CONSTRAINT `fk_livreur` FOREIGN KEY (`livreur`) REFERENCES `livreur` (`idLivreur`),
-  ADD CONSTRAINT `fk_pizza` FOREIGN KEY (`pizza`) REFERENCES `pizza` (`idPizza`);
+  ADD CONSTRAINT `fk_livreur` FOREIGN KEY (`livreur`) REFERENCES `livreur` (`idLivreur`);
 
 --
 -- Constraints for table `ingredientsparpizza`
@@ -330,13 +359,20 @@ ALTER TABLE `ingredientsparpizza`
 -- Constraints for table `livraison`
 --
 ALTER TABLE `livraison`
-  ADD CONSTRAINT `fk_commande` FOREIGN KEY (`commande`) REFERENCES `commande` (`idCommande`);
+  ADD CONSTRAINT `fk_commande` FOREIGN KEY (`commande`) REFERENCES `commande` (`idCommande`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `livreur`
 --
 ALTER TABLE `livreur`
   ADD CONSTRAINT `fk_vehicule` FOREIGN KEY (`vehicule`) REFERENCES `vehicule` (`idVehicule`);
+
+--
+-- Constraints for table `pizzaparcommande`
+--
+ALTER TABLE `pizzaparcommande`
+  ADD CONSTRAINT `fk_idCommandeidCommande` FOREIGN KEY (`idCommande`) REFERENCES `commande` (`idCommande`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_idPizzaidPizza` FOREIGN KEY (`idPizza`) REFERENCES `pizza` (`idPizza`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `vehicule`
